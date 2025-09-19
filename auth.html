@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Syquora - Auth Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="auth.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <!-- Floating background shapes -->
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+
+    <div
+      class="container max-w-md w-full mx-auto p-8 card rounded-2xl fade-in relative z-10"
+    >
+      <!-- Logo/Icon -->
+      <div class="auth-icon">
+        <img src="images/logo.png" alt="Syquora Logo" />
+      </div>
+
+      <h1
+        id="form-title"
+        class="text-3xl font-bold text-center mb-2 text-gray-800"
+      >
+        Welcome Back
+      </h1>
+      <p class="text-center text-gray-600 mb-8">
+        Sign in to continue to Syquora
+      </p>
+
+      <form id="auth-form" class="space-y-6">
+        <!-- Username (only for signup) -->
+        <div id="username-field" class="input-wrapper">
+          <label
+            for="username"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            <i class="fas fa-user mr-2 text-purple-500"></i>Username
+          </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="mt-1 block w-full px-4 py-3 rounded-xl input-field focus:outline-none"
+            placeholder="Enter your username"
+            required
+          />
+        </div>
+
+        <!-- Email -->
+        <div class="input-wrapper">
+          <label
+            for="email"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            <i class="fas fa-envelope mr-2 text-purple-500"></i>Email Address
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="mt-1 block w-full px-4 py-3 rounded-xl input-field focus:outline-none"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="input-wrapper">
+          <label
+            for="password"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            <i class="fas fa-lock mr-2 text-purple-500"></i>Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="mt-1 block w-full px-4 py-3 rounded-xl input-field focus:outline-none"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+
+        <!-- Divider -->
+        <div class="flex items-center my-6">
+          <div class="flex-1 border-t border-gray-300"></div>
+          <span class="px-4 text-sm text-gray-500 bg-white"
+            >or continue with</span
+          >
+          <div class="flex-1 border-t border-gray-300"></div>
+        </div>
+
+       <!-- Google Sign-In button -->
+<div id="g_id_onload"
+     data-client_id="YOUR_GOOGLE_CLIENT_ID"
+     data-callback="handleCredentialResponse"
+     data-auto_select="true">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-size="large"
+     data-theme="outline"
+     data-text="continue_with"
+     data-shape="rect"
+     data-logo_alignment="left">
+</div>
+
+<!-- Placeholder to show logged-in user info -->
+<div id="user-info"></div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full px-4 py-3 rounded-xl text-white font-semibold btn focus:outline-none"
+        >
+          <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+        </button>
+
+        <p class="text-center text-sm text-gray-600 mt-6">
+          <span
+            id="toggle-btn"
+            class="cursor-pointer toggle-link hover:underline font-medium"
+          >
+            Don't have an account? Sign up
+          </span>
+        </p>
+      </form>
+    </div>
+  </body>
+  <script src="auth.js"></script>
+</html>
