@@ -117,3 +117,24 @@ function parseJwt(token) {
   ).join(''));
   return JSON.parse(jsonPayload);
 }
+
+function handleCredentialResponse(response) {
+  // This is the ID token you get from Google
+  const idToken = response.credential;
+
+  // Send to backend API for verification
+  fetch("/api/auth/google", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: idToken })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("User data:", data);
+    document.getElementById("user-info").innerHTML = `
+      <p>Welcome, ${data.user?.name}</p>
+      <p>Email: ${data.user?.email}</p>
+    `;
+  })
+  .catch(err => console.error(err));
+}
