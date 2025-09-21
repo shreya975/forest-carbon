@@ -7,134 +7,106 @@ const usernameInput = document.getElementById("username");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 
-let isLogin = false;
+let isLogin = true;
 const users = JSON.parse(localStorage.getItem("dummyUsers")) || {};
 
 function redirectToMainPage() {
   localStorage.setItem("isLoggedIn", "true");
-  window.location.href = "index.html"; // home page
+  window.location.href = "index.html"; // redirect after login
 }
 
+// Toggle Login <-> Signup
 toggleBtn.addEventListener("click", () => {
   isLogin = !isLogin;
   if (isLogin) {
     formTitle.textContent = "Login";
-    submitBtn.textContent = "Login";
-    toggleBtn.textContent = "New user? Sign up";
-    usernameField.style.display = "none"; // hide username in login
+    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+    toggleBtn.textContent = "Don’t have an account? Sign up";
+    usernameField.classList.add("hidden");
     usernameInput.required = false;
   } else {
     formTitle.textContent = "Sign Up";
-    submitBtn.textContent = "Sign Up";
-    toggleBtn.textContent = "Already have an account? Log in";
-    usernameField.style.display = "block"; // show username in signup
+    submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up';
+    toggleBtn.textContent = "Already have an account? Login";
+    usernameField.classList.remove("hidden");
     usernameInput.required = true;
   }
 });
 
+// Handle Form Submit
 authForm.addEventListener("submit", (e) => {
   e.preventDefault();
+
   const username = usernameInput.value.trim();
-  const email = emailInput.value;
-  const password = passwordInput.value;
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if (!email.includes("@gmail.com")) {
-    alert("Please use a valid Gmail address.");
-    return;
+    return showMessage("❌ Please use a valid Gmail address.", "error");
   }
 
-  // ⬇️ ONLY APPLY PASSWORD RULES FOR SIGNUP (NEW ACCOUNTS) ⬇️
-  if (!isLogin) { // This means it's SIGN UP
+  if (!isLogin) {
+    // Signup Password Rules
     if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
-      alert("Password must include letters and numbers.");
-      return;
+      return showMessage("⚠️ Password must include letters and numbers.", "error");
     }
   }
-  // ⬆️ NO PASSWORD FORMAT VALIDATION FOR LOGIN ⬆️
 
   if (isLogin) {
-    // LOGIN - No password format validation
     if (users[email] && users[email].password === password) {
-      alert(`Welcome back, ${users[email].username}! Redirecting...`);
-      redirectToMainPage();
+      showMessage(`✅ Welcome back, ${users[email].username}! Redirecting...`, "success");
+      setTimeout(redirectToMainPage, 1000);
     } else {
-      alert("Invalid email or password.");
+      showMessage("❌ Invalid email or password.", "error");
     }
   } else {
-    // SIGNUP - Password rules applied above
     if (users[email]) {
-      alert("Account already exists. Please log in.");
+      showMessage("⚠️ Account already exists. Please login.", "error");
     } else {
       users[email] = { username, password };
       localStorage.setItem("dummyUsers", JSON.stringify(users));
-      alert(`Signup successful! Welcome, ${username}! Redirecting...`);
-      redirectToMainPage();
+      showMessage(`🎉 Signup successful! Welcome, ${username}!`, "success");
+      setTimeout(redirectToMainPage, 1000);
     }
   }
 });
 
+// Custom Message Display
+function showMessage(msg, type) {
+  const box = document.createElement("div");
+  box.textContent = msg;
+  box.className = `fixed top-5 right-5 px-4 py-2 rounded-lg shadow-lg text-white ${
+    type === "success" ? "bg-green-500" : "bg-red-500"
+  }`;
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 3000);
+}
+
+// Google Login
 function handleGoogleResponse(response) {
   const data = parseJwt(response.credential);
-  console.log("Google User:", data);
-
   localStorage.setItem("isLoggedIn", "true");
   localStorage.setItem("userEmail", data.email);
   localStorage.setItem("userName", data.name);
   localStorage.setItem("userPicture", data.picture);
 
-  alert(`Welcome ${data.name}! Redirecting...`);
-  window.location.href = "index.html";
-}
-
-function parseJwt(token) {
-  var base64Url = token.split(".")[1];
-  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  var jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
-  return JSON.parse(jsonPayload);
-}
-
-function handleCredentialResponse(response) {
-  const data = parseJwt(response.credential);
   document.getElementById("user-info").innerHTML = `
     <p><strong>Welcome:</strong> ${data.name}</p>
     <p><strong>Email:</strong> ${data.email}</p>
     <img src="${data.picture}" width="40" style="border-radius:50%">
   `;
+  showMessage(`✅ Logged in as ${data.name}`, "success");
+  setTimeout(redirectToMainPage, 1000);
 }
 
 function parseJwt(token) {
-  let base64Url = token.split('.')[1];
-  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  let jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
-    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-  ).join(''));
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join("")
+  );
   return JSON.parse(jsonPayload);
-}
-
-function handleCredentialResponse(response) {
-  // This is the ID token you get from Google
-  const idToken = response.credential;
-
-  // Send to backend API for verification
-  fetch("/api/auth/google", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: idToken })
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log("User data:", data);
-    document.getElementById("user-info").innerHTML = `
-      <p>Welcome, ${data.user?.name}</p>
-      <p>Email: ${data.user?.email}</p>
-    `;
-  })
-  .catch(err => console.error(err));
 }
